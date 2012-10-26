@@ -24,12 +24,17 @@
 
 package org.jboss.as.clustering.infinispan.subsystem;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
+import org.jboss.as.controller.PathAddress;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.controller.operations.common.Util;
 import org.jboss.as.controller.parsing.ParseUtils;
 import org.jboss.dmr.ModelNode;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
@@ -68,6 +73,65 @@ public class InfinispanSubsystemXMLReader_1_4 extends InfinispanSubsystemXMLRead
             default: {
                 throw ParseUtils.unexpectedAttribute(reader, index);
             }
+        }
+    }
+
+    @Override
+    protected void parseDistributedCache(XMLExtendedStreamReader reader, PathAddress containerAddress, List<ModelNode> operations) throws XMLStreamException {
+
+        // ModelNode for the cache add operation
+        ModelNode cache = Util.getEmptyOperation(ModelDescriptionConstants.ADD, null);
+        List<ModelNode> additionalConfigurationOperations = new ArrayList<ModelNode>();
+
+        for (int i = 0; i < reader.getAttributeCount(); i++) {
+            String value = reader.getAttributeValue(i);
+            Attribute attribute = Attribute.forName(reader.getAttributeLocalName(i));
+            switch (attribute) {
+                case OWNERS: {
+                    DistributedCacheResource.OWNERS.parseAndSetParameter(value, cache, reader);
+                    break;
+                }
+                case SEGMENTS: {
+                    DistributedCacheResource.SEGMENTS.parseAndSetParameter(value, cache, reader);
+                    break;
+                }
+                case L1_LIFESPAN: {
+                    DistributedCacheResource.L1_LIFESPAN.parseAndSetParameter(value, cache, reader);
+                    break;
+                }
+                default: {
+                    this.parseClusteredCacheAttribute(reader, i, attribute, value, cache);
+                }
+            }
+        }
+
+        if (!cache.hasDefined(ModelKeys.NAME)) {
+            throw ParseUtils.missingRequired(reader, EnumSet.of(Attribute.NAME));
+        }
+        if (!cache.hasDefined(ModelKeys.MODE)) {
+            throw ParseUtils.missingRequired(reader, EnumSet.of(Attribute.MODE));
+        }
+
+        // update the cache address with the cache name
+        addCacheNameToAddress(cache, containerAddress, ModelKeys.DISTRIBUTED_CACHE) ;
+
+        while (reader.hasNext() && (reader.nextTag() != XMLStreamConstants.END_ELEMENT)) {
+            Element element = Element.forName(reader.getLocalName());
+            switch (element) {
+                case STATE_TRANSFER: {
+                    this.parseStateTransfer(reader, cache, additionalConfigurationOperations);
+                    break;
+                }
+                default: {
+                    this.parseCacheElement(reader, element, cache, additionalConfigurationOperations);
+                }
+            }
+        }
+
+        operations.add(cache);
+        // add operations to create configuration resources
+        for (ModelNode additionalOperation : additionalConfigurationOperations) {
+            operations.add(additionalOperation);
         }
     }
 

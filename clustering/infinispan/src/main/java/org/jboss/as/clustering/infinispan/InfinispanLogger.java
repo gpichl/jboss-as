@@ -100,4 +100,11 @@ public interface InfinispanLogger extends BasicLogger {
     @Message(id = 10285, value = "'%s' cache container installed.")
     void cacheContainerInstalled(String containerName);
 
+    /**
+     * Logs a warning message stating that the 'virtual-nodes' attribute is deprecated
+     */
+    @LogMessage(level = WARN)
+    @Message(id = 10286, value = "Attribute 'virtual-nodes' has been deprecated and replaced by 'segments'.")
+    void virtualNodesAttributeDeprecated();
+
 }

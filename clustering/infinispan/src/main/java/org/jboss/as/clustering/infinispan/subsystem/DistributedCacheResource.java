@@ -62,15 +62,15 @@ public class DistributedCacheResource extends SharedCacheResource {
                     .setDefaultValue(new ModelNode().set(2))
                     .build();
 
-    static final SimpleAttributeDefinition VIRTUAL_NODES =
-            new SimpleAttributeDefinitionBuilder(ModelKeys.VIRTUAL_NODES, ModelType.INT, true)
-                    .setXmlName(Attribute.VIRTUAL_NODES.getLocalName())
+    static final SimpleAttributeDefinition SEGMENTS =
+            new SimpleAttributeDefinitionBuilder(ModelKeys.SEGMENTS, ModelType.INT, true)
+                    .setXmlName(Attribute.SEGMENTS.getLocalName())
                     .setAllowExpression(false)
                     .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
-                    .setDefaultValue(new ModelNode().set(1))
+                    .setDefaultValue(new ModelNode().set(50)) // Recommended value is 10 * max_cluster_size.
                     .build();
 
-    static final AttributeDefinition[] DISTRIBUTED_CACHE_ATTRIBUTES = {OWNERS, VIRTUAL_NODES, L1_LIFESPAN};
+    static final AttributeDefinition[] DISTRIBUTED_CACHE_ATTRIBUTES = {OWNERS, SEGMENTS, L1_LIFESPAN};
 
     public DistributedCacheResource(final ResolvePathHandler resolvePathHandler) {
         super(DISTRIBUTED_CACHE_PATH,

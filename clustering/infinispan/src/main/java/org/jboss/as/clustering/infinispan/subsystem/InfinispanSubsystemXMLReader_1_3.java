@@ -22,6 +22,7 @@
 
 package org.jboss.as.clustering.infinispan.subsystem;
 
+import static org.jboss.as.clustering.infinispan.InfinispanLogger.ROOT_LOGGER;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 
@@ -241,7 +242,7 @@ public class InfinispanSubsystemXMLReader_1_3 implements XMLElementReader<List<M
         }
     }
 
-    private void parseClusteredCacheAttribute(XMLExtendedStreamReader reader, int index, Attribute attribute, String value, ModelNode cache) throws XMLStreamException {
+    protected void parseClusteredCacheAttribute(XMLExtendedStreamReader reader, int index, Attribute attribute, String value, ModelNode cache) throws XMLStreamException {
         switch (attribute) {
             case ASYNC_MARSHALLING: {
                 ClusteredCacheResource.ASYNC_MARSHALLING.parseAndSetParameter(value, cache, reader);
@@ -306,7 +307,7 @@ public class InfinispanSubsystemXMLReader_1_3 implements XMLElementReader<List<M
         }
     }
 
-    private void parseDistributedCache(XMLExtendedStreamReader reader, PathAddress containerAddress, List<ModelNode> operations) throws XMLStreamException {
+    protected void parseDistributedCache(XMLExtendedStreamReader reader, PathAddress containerAddress, List<ModelNode> operations) throws XMLStreamException {
 
         // ModelNode for the cache add operation
         ModelNode cache = Util.getEmptyOperation(ModelDescriptionConstants.ADD, null);
@@ -321,7 +322,7 @@ public class InfinispanSubsystemXMLReader_1_3 implements XMLElementReader<List<M
                     break;
                 }
                 case VIRTUAL_NODES: {
-                    DistributedCacheResource.VIRTUAL_NODES.parseAndSetParameter(value, cache, reader);
+                    ROOT_LOGGER.virtualNodesAttributeDeprecated();
                     break;
                 }
                 case L1_LIFESPAN: {
@@ -444,7 +445,7 @@ public class InfinispanSubsystemXMLReader_1_3 implements XMLElementReader<List<M
         }
     }
 
-    private void addCacheNameToAddress(ModelNode cache, PathAddress containerAddress, String cacheType) {
+    protected void addCacheNameToAddress(ModelNode cache, PathAddress containerAddress, String cacheType) {
 
         String name = cache.get(ModelKeys.NAME).asString();
         // setup the cache address
@@ -504,7 +505,7 @@ public class InfinispanSubsystemXMLReader_1_3 implements XMLElementReader<List<M
         }
     }
 
-    private void parseStateTransfer(XMLExtendedStreamReader reader, ModelNode cache, List<ModelNode> operations) throws XMLStreamException {
+    protected void parseStateTransfer(XMLExtendedStreamReader reader, ModelNode cache, List<ModelNode> operations) throws XMLStreamException {
 
         PathAddress stateTransferAddress = PathAddress.pathAddress(cache.get(OP_ADDR)).append(ModelKeys.STATE_TRANSFER, ModelKeys.STATE_TRANSFER_NAME);
         ModelNode stateTransfer = Util.createAddOperation(stateTransferAddress);
